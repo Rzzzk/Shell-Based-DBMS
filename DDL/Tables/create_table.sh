@@ -8,6 +8,7 @@ echo "create table in << ${current_db} >> database"
 # ask the user for the table name
 read -p "Enter the name of the table to create: " table_name
 
+## TODO: check if the table name is accepted.
 
 # check if the table already exists
 if [ -f "${current_db}/tables/${table_name}" ]
@@ -27,6 +28,8 @@ else
         read -p "Enter the name of column $i: " column_name
         read -p "Enter the data type of column $i (e.g., INT, STRING): " column_type
         read -p "Is this column a primary key? (y/n): " is_primary_key
+
+        ### TODO  ONLY one PK per table is allowed. add check later.
 
         # write the column metadata to the metadata file
         if [ "$is_primary_key" == "y" ] || [ "$is_primary_key" == "Y" ]; then
