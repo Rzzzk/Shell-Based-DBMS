@@ -138,7 +138,98 @@ then
             echo "${column_data[@]}" 
 
             # user enter a condition to identify which rows to update
-            # ex: update where id=5 or name='Ahmed'or age>30               
+            # ex: update where id=5 or name='Ahmed'or age>30
+
+            read -p "Enter the condition to identify rows to update (e.g., id=5): " condition
+
+            # parse the condition
+            condition_column=$(echo $condition | awk -F'[=<>]' '{print $1}')
+            condition_operator=$(echo $condition | grep -o '[=<>]' )
+            condition_value=$(echo $condition | awk -F'[=<>]' '{print $2}')
+
+            # find the index of the condition column
+            condition_column_index=-1
+            for (( i=0; i<column_num; i++ ))
+            do
+                if [[ "${column_names[$i]}" == "$condition_column" ]]; then
+                    condition_column_index=$i
+                    break
+                fi
+            done
+
+            # check if the condition column exists
+            if [[ $condition_column_index -eq -1 ]]; then
+                echo "Condition column '$condition_column' does not exist in table '$table_name'."
+            else
+
+                # get the data of the condition column
+                condition_column_data=($(awk -F':' -v idx=$((condition_column_index+1)) '{print $idx}' ${current_db}/tables/${table_name}))
+                echo "Condition column data: ${condition_column_data[@]}"
+
+                # print confirmation
+                echo "Condition column '$condition_column' found in table '$table_name'."
+
+                # iterate through the condition column data to find matching rows
+                for (( i=0; i<${#condition_column_data[@]}; i++ ))
+                do
+                    match=false
+                    case $condition_operator in
+                    "=")
+                        if [[ "${condition_column_data[$i]}" == "$condition_value" ]]; then
+                            match=true
+                        fi
+                        ;;
+                    "<")
+                        if [[ "${condition_column_data[$i]}" -lt "$condition_value" ]]; then
+                            match=true
+                        fi
+                        ;;
+                    ">")
+                        if [[ "${condition_column_data[$i]}" -gt "$condition_value" ]]; then
+                            match=true
+                        fi
+                        ;;
+                    esac
+
+                    # if row matches condition, update it
+                    if [[ $match == true ]]; then
+                        echo "Updating row $((i+1))"
+
+                        # read the entire row and update the specific column
+                        row_data=($(awk -F':' -v row=$((i+1)) '{if(NR==row) print $0}' ${current_db}/tables/${table_name}))
+
+                        
+                        # Ex: old_dat = "1:Ahmed:25" >> array ( 1 Ahmed  25 )
+                        # access the index needed and update it
+ 
+                        # row_data isseperated by : use sed to update the specific column 
+                        # cann't use array index directly
+                        # row_data[$update_column_index]="$input_value" is not working
+                        # row_data is not array but a string
+                        # need to split it into array first
+                        IFS=':' read -r -a row_array <<< "${row_data[*]}"
+                        row_array[$update_column_index]="$input_value"
+
+
+
+                        # return the updated row as a string
+                        updated_row=$(IFS=':'; echo "${row_array[*]}")
+                        echo "Updated row data: $updated_row"
+
+                        # so the row number i+1 needs to be updated in the table file
+                        # use sed to update the specific line in the file
+                        sed -i "$((i+1))s/.*/$updated_row/" ${current_db}/tables/${table_name}
+                        echo "Row $((i+1)) updated successfully."
+                        
+                    fi
+                done
+
+                echo "Update completed successfully."
+
+
+            fi
+
+                 
         fi
 
 
