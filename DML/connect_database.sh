@@ -22,6 +22,7 @@ then
       "Create Table"
       "Drop Table"
       "Insert into Table"
+      "Update Table"
       "Select from Table"
       "Delete from Table"
       "Back to Main Menu"
@@ -40,11 +41,13 @@ then
                   ;;
                4) source ./DML/insert_into_table.sh "$current_db"
                   ;;
-               5) source ./DML/select_from_table.sh "$current_db"
+               5) source ./DML/update_table.sh "$current_db"
                   ;;
-               6) source ./DML/delete_from_table.sh "$current_db"
+               6) source ./DML/select_from_table.sh "$current_db"
                   ;;
-               7) echo "Returning to Main Menu."
+               7) source ./DML/delete_from_table.sh "$current_db"
+                  ;;
+               8) echo "Returning to Main Menu."
                   break 2
                   ;;
                *) echo "Invalid option. Please try again."

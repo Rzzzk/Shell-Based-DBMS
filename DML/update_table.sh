@@ -1,8 +1,13 @@
 #! /usr/bin/bash
 
+
 shopt -s extglob
 
-echo "insert into table script! ${1} database"
+#! /usr/bin/bash
+
+shopt -s extglob
+
+echo "Update table script! ${1} database"
 
 # ask the user for the table name
 read -p "Enter the name of the table: " table_name
@@ -22,28 +27,36 @@ then
     column_num=${#column_names[@]}
 
 
-    # loop through each column and get the value from the user for each column
-    row_values=""
-    error_flag=false
+    # which column to update
+    read -p "Enter the name of the column to update: " col_name
 
+    # check if the column exists
+    update_column_index=-1
     for (( i=0; i<column_num; i++ ))
     do
+        if [[ "${column_names[$i]}" == "$col_name" ]]; then
+            update_column_index=$i
+            break
+        fi
+    done
 
-        # get column info
-        col_name=${column_names[$i]}
-        col_dtype=${column_dtypes[$i]^^} # convert to uppercase
-        col_constraint=${column_constraints[$i]^^} # convert to uppercase
+    
 
-        # get existing data in the column for constraint checks
-        column_data=($(awk -v col=$((i+1)) 'BEGIN { FS=":"; OFS="," } { print $col }' ${current_db}/tables/${table_name}))
+    if [[ $update_column_index -eq -1 ]]; then
+        echo "Column '$col_name' does not exist in table '$table_name'."
+    else
+        echo "Updating column '$col_name' in table '$table_name'."
 
-        # prompt the user for input
-        echo "Enter value for column ${col_name} Type: ${col_dtype}, Constraint: ${col_constraint}"
-        
-        
-        # read user input
-        input_value=""
+        col_dtype=${column_dtypes[$update_column_index]^^} # convert to uppercase
+        col_constraint=${column_constraints[$update_column_index]^^} # convert to uppercase
+        column_data=($(awk -F':' -v idx=$((update_column_index+1)) '{print $idx}' ${current_db}/tables/${table_name}))
+
+
+        error_flag=false 
+
+        echo "Enter new value for column ${col_name} Type: ${col_dtype}, Constraint: ${col_constraint}"
         read -p "> " input_value
+
 
         # validate constraints
 
@@ -55,39 +68,37 @@ then
                 if [[ $input_value == "$current_value" ]]; then
                     echo "Error: Duplicate value for '$col_constraint' column '$col_name'."
                     error_flag=true
-                    break 2 # exit both loops
                 fi
             done
         fi
+        ##########################################################
 
         # NOT NULL and PK constraint
         if [[ $col_constraint == "NOT NULL" ]] || [[ $col_constraint == "PK" ]]; then
             if [[ -z $input_value ]] || [[ $input_value == "null" ]] || [[ $input_value == "NULL" ]] || [[ $input_value == " " ]]; then
                 echo "Error: NULL value not allowed for column '$col_name'."
                 error_flag=true
-                break 2 # exit both loops
             fi
         fi
-
+        ##########################################################
 
         # validate input based on data type
         if [[ $col_dtype == "INT" ]]; then
 
             case $input_value in
             +([0-9]))
-                row_values+=":${input_value}"
+                input_value="$input_value"
                 ;;
             *)  
                 # check for null input
                 if [[ -z $input_value ]] || [[ $input_value == "null" ]] || [[ $input_value == "NULL" ]] || [[ $input_value == " " ]]; then
-                row_values+=":null"
+                input_value="null"
                 else
                     # invalid input
-                    echo "Invalid input. Expected a string value."
+                    echo "Invalid input. Expected a INT value."
                     error_flag=true
                 fi
 
-                break
                 ;;
             esac
             
@@ -95,20 +106,19 @@ then
             case $input_value in
             +([0-9]))
                 # invalid input
-                echo "Invalid input. Expected a string value."
+                echo "Invalid input. Expected a STRING value."
                 error_flag=true
-                break
                 ;;
             +([A-z]|[' ']))
-                row_values+=":${input_value}"
+                input_value="$input_value"
                 ;;
             +([A-z]|[0-9]|[' ']))
-                row_values+=":${input_value}"
+                input_value="$input_value"
                 ;;
             *)
                 # check for null input
                 if [[ -z $input_value ]] || [[ $input_value == "null" ]] || [[ $input_value == "NULL" ]] || [[ $input_value == " " ]]; then
-                row_values+=":null"
+                row_values="null"
                 else
                     # invalid input
                     echo "Invalid input. Expected a string value."
@@ -120,26 +130,28 @@ then
             esac
             
         fi
+
+
+
+        if [[ $error_flag == false ]]; then
+            echo "Good value to update"
+            echo "${column_data[@]}" 
+
+            # user enter a condition to identify which rows to update
+            # ex: update where id=5 or name='Ahmed'or age>30               
+        fi
+
+
         
-    done
-
-    # check if there was any error during input
-    if [[ $error_flag == false ]]; then
-        # print the row values
-        echo "Row values: ${row_values:1}"
-
-        # insert the row into the table
-        echo "${row_values:1}" >> "${current_db}/tables/${table_name}"
-        echo "Row inserted successfully into table '$table_name'."
-        echo "----------------------------------------"
-        echo
     fi
 
+    
 
 else
     # table does not exist
     echo "Table '$table_name' does not exist in database."
 fi
+
 
 
 
