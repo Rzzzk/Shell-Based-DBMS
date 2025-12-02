@@ -4,8 +4,14 @@
 # source the configuration file
 source ./config.sh
 
+echo "----------------------------------"
+echo "-----  Connect to Database  ------"
+echo "----------------------------------"
+echo
+
 
 # ask the user for the database name
+db_name=""
 read -p "Enter the name of the database to connect to: " db_name
 
 # check if the database exists
@@ -15,7 +21,7 @@ then
    # connect to the database
    echo "Connected to database '$db_name' successfully."
    current_db="$DATA_BASES_DIR/$db_name"
-
+   echo
    # database operations menu
    option=(
       "List Tables"
@@ -26,6 +32,7 @@ then
       "Select from Table"
       "Delete from Table"
       "Back to Main Menu"
+      "Clear"
    )
 
    # start the database operations loop
@@ -33,13 +40,17 @@ then
       echo "Database Menu - Connected to '$db_name':"
       select opt in "${option[@]}"; do
          case $REPLY in
-               1) source ./DML/list_tables.sh "$current_db"
+               1) source ./DML/list_tables.sh
+               break
                   ;;
-               2) source ./DDL/Tables/create_table.sh "$current_db"
+               2) source ./DDL/Tables/create_table.sh
+               break
                   ;;
                3) source ./DDL/Tables/drop_table.sh "$current_db"
+               break
                   ;;
                4) source ./DML/insert_into_table.sh "$current_db"
+               break
                   ;;
                5) source ./DML/update_table.sh "$current_db"
                   ;;
@@ -50,6 +61,9 @@ then
                8) echo "Returning to Main Menu."
                   break 2
                   ;;
+               9) clear 
+                  break
+                  ;;
                *) echo "Invalid option. Please try again."
                   ;;
          esac
@@ -59,4 +73,6 @@ then
 else
     echo "Database '$db_name' does not exist."
     echo "Please create the database first."
+    echo
+    echo "-------------------------"
 fi

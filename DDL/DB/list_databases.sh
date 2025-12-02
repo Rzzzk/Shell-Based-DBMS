@@ -4,6 +4,10 @@ source ./config.sh
 
 
 # list existing databases
-echo "Existing Databases:"
+echo "-------------------------"
+echo "-- Existing Databases: --"
+echo "-------------------------"
+echo 
 ls  $DATA_BASES_DIR
-echo "-------------------"
+echo
+echo "-------------------------"

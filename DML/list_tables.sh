@@ -1,9 +1,10 @@
 #! /usr/bin/bash
 
-# get the current database path
-current_db=${1}
-echo "list the tables of << ${current_db} >> database"
-
+echo "---------------------------------------------"
+echo "---  The tables of [${db_name}] database  ---"
+echo "---------------------------------------------"
+echo 
 # list the tables in the current database
-ls -1 "${current_db}/tables"
-echo "------------------"
+ls "${current_db}/tables"
+echo
+echo "-------------------------"
