@@ -55,10 +55,10 @@ then
                5) source ./DML/update_table.sh
                   break
                   ;;
-               6) source ./DML/select_from_table.sh
+               6) source ./DML/select_from_table.sh "$current_db"
                   break
                   ;;
-               7) source ./DML/delete_from_table.sh
+               7) source ./DML/delete_from_table.sh "$current_db"
                   break
                   ;;
                8) echo "Returning to Main Menu."
