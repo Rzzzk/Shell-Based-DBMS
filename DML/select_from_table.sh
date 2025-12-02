@@ -14,7 +14,9 @@ select_display_menu(){
 	select option in "diplay_all" "specific_columns" ; do
 	    case $option in
 		"diplay_all")
+			echo "*****************************"
 			cat  $2
+			echo "*****************************"
 			return
 		    ;;
 		"specific_columns")
@@ -61,7 +63,9 @@ select_display_menu(){
 			fi
 			# now display the selected column needed 
 			fields=$(IFS=,; echo "${!column_to_display[*]}")
+			echo "*****************************"
 			cut -d: -f"$fields" $2
+			echo "*****************************"
 			
 			
 			return 
