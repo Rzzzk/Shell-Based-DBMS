@@ -28,17 +28,37 @@ select_display_menu(){
 			while true
 			do 	
 			
-				read -p "enter the column number u want to display or type (n) to finish" column_num
-				# ToDo: check the input 
+				read -p "enter the column number u want to display or type (n) to finish : " column_num
+				
+				
 				if [ $column_num = "n" ]
 				then
 					break 
 				fi
+				
+				
+				# check the validiaty of the column number entered
+				if [[ ! $column_num  =~ ^[1-9]+$ ||  $column_num -gt $num_of_columns ]]
+				then
+					
+					echo "Invalid Column Number"
+					
+					continue 
+				fi
+				
+				
+				
+				
 				# save them in a visited array 
 				column_to_display[$column_num]=1
 			
 			done
 			
+			# no columns entered return 
+			if [ ${#column_to_display[@]} -eq 0 ]
+			then
+				return 
+			fi
 			# now display the selected column needed 
 			fields=$(IFS=,; echo "${!column_to_display[*]}")
 			cut -d: -f"$fields" $2
@@ -70,7 +90,7 @@ conditioned_table(){
 		# go-to 1 again  done unitl user type n  
 		
 		cp $default_path/$connectedDB/tables/$1  /tmp/$1
-		#cat /tmp/$1
+		
 		echo "*******************"
 		# print columns 
 		while true
@@ -82,7 +102,7 @@ conditioned_table(){
 			read -p "enter the column number u want to be conditioned at or (n) to display result : " conditioned_column
 			
 			
-			if [ $conditioned_column -gt  $num_of_columns  ] 
+			if [[ ! $conditioned_column  =~ ^[1-9]+$ ||  $conditioned_column -gt $num_of_columns ]]
 			then
 				echo "invalid number"
 				continue  
@@ -93,9 +113,12 @@ conditioned_table(){
 			if [ $conditioned_column = "n" ] 
 			then
 				break 
-			fi  
+			fi
+			  
+			# get column type 
 			C_type=$(sed -n "${conditioned_column}p" <<< "$columns" | awk -F: '{print $2}')
 			echo $C_type
+			
 			if [ $C_type = INT ]
 			then
 				select option in "==" ">" "<"; do
@@ -108,7 +131,7 @@ conditioned_table(){
 					    awk -F: -v value="$value" -v column="$conditioned_column" '{ if ($column == value) print }' /tmp/$1  >  /tmp/con_temp
 					    mv /tmp/con_temp /tmp/$1
 					    
-					    read -p "do u want to add another condition (y|n)"  conTinue
+					    read -p "do u want to add another condition (y|n): "  conTinue
 					    
 							      
 					    if [ $conTinue = "y" ] 
@@ -131,7 +154,7 @@ conditioned_table(){
 					    awk -F: -v value="$value" -v column="$conditioned_column" '{ if ($column > value) print }' /tmp/$1  >  /tmp/con_temp
 					    mv /tmp/con_temp /tmp/$1
 					    
-					    read -p "do u want to add another condition (y|n)"  conTinue
+					    read -p "do u want to add another condition (y|n): "  conTinue
 					    
 							      
 					    if [ $conTinue = "y" ] 
@@ -155,7 +178,7 @@ conditioned_table(){
 					    awk -F: -v value="$value" -v column="$conditioned_column" '{ if ($column < value) print }' /tmp/$1  >  /tmp/con_temp
 					    mv /tmp/con_temp /tmp/$1
 					    
-					    read -p "do u want to add another condition (y|n)"  conTinue
+					    read -p "do u want to add another condition (y|n): "  conTinue
 					    
 							      
 					    if [ $conTinue = "y" ] 
@@ -188,7 +211,7 @@ conditioned_table(){
 					    awk -F: -v value="$value" -v column="$conditioned_column" '{ if ($column == value) print }' /tmp/$1  >  /tmp/con_temp
 					    mv /tmp/con_temp /tmp/$1
 					    
-					    read -p "do u want to add another condition (y|n)"  conTinue
+					    read -p "do u want to add another condition (y|n): "  conTinue
 					    
 							      
 					    if [ $conTinue = "y" ] 
