@@ -252,7 +252,7 @@ conditioned_table(){
 select_table(){	
 	while true 
 	do 
-		read -p "Enter Table Name" TableName
+		read -p "Enter Table Name: " TableName
 		
 		if [ -f $default_path/$connectedDB/tables/$TableName ]
 		then

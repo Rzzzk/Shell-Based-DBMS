@@ -12,7 +12,7 @@ delete_table(){
 	echo "*******************"	
 	while true 
 	do 
-		read -p "Enter Table Name" TableName
+		read -p "Enter Table Name: " TableName
 		
 		if [ -f $default_path/$connectedDB/tables/$TableName ]
 		then
@@ -33,7 +33,7 @@ delete_table(){
 			read -p "enter the column number u want to be conditioned at or (n) to display result : " conditioned_column
 			
 			
-			if [ $conditioned_column -gt  $num_of_columns  ] 
+			if [[ ! $conditioned_column  =~ ^[1-9]+$ ||  $conditioned_column -gt $num_of_columns ]]
 			then
 				echo "invalid number"
 				continue  
@@ -45,8 +45,10 @@ delete_table(){
 			then
 				break 
 			fi  
+			
 			C_type=$(sed -n "${conditioned_column}p" <<< "$columns" | awk -F: '{print $2}')
 			echo $C_type
+			
 			if [ $C_type = INT ]
 			then
 				select option in "==" ">" "<"; do
@@ -126,6 +128,7 @@ delete_table(){
 					    ;;
 				    esac
 				done
+			   
 			   else 
 			   # is string 
 			   select option in "==" ; do
@@ -161,8 +164,7 @@ delete_table(){
 			fi
 				
 		 done
-		 echo  /tmp/$TableName
-		 echo  $default_path/$connectedDB/tables/$TableName
+		 echo "Rows Deleted"
 		 mv /tmp/$TableName $default_path/$connectedDB/tables/$TableName
 		 
 		 
