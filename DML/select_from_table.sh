@@ -14,7 +14,9 @@ select_display_menu(){
 	select option in "diplay_all" "specific_columns" ; do
 	    case $option in
 		"diplay_all")
+			echo "*****************************"
 			cat  $2
+			echo "*****************************"
 			return
 		    ;;
 		"specific_columns")
@@ -28,20 +30,42 @@ select_display_menu(){
 			while true
 			do 	
 			
-				read -p "enter the column number u want to display or type (n) to finish" column_num
-				# ToDo: check the input 
+				read -p "enter the column number u want to display or type (n) to finish : " column_num
+				
+				
 				if [ $column_num = "n" ]
 				then
 					break 
 				fi
+				
+				
+				# check the validiaty of the column number entered
+				if [[ ! $column_num  =~ ^[1-9]+$ ||  $column_num -gt $num_of_columns ]]
+				then
+					
+					echo "Invalid Column Number"
+					
+					continue 
+				fi
+				
+				
+				
+				
 				# save them in a visited array 
 				column_to_display[$column_num]=1
 			
 			done
 			
+			# no columns entered return 
+			if [ ${#column_to_display[@]} -eq 0 ]
+			then
+				return 
+			fi
 			# now display the selected column needed 
 			fields=$(IFS=,; echo "${!column_to_display[*]}")
+			echo "*****************************"
 			cut -d: -f"$fields" $2
+			echo "*****************************"
 			
 			
 			return 
@@ -70,7 +94,7 @@ conditioned_table(){
 		# go-to 1 again  done unitl user type n  
 		
 		cp $default_path/$connectedDB/tables/$1  /tmp/$1
-		#cat /tmp/$1
+		
 		echo "*******************"
 		# print columns 
 		while true
@@ -82,7 +106,7 @@ conditioned_table(){
 			read -p "enter the column number u want to be conditioned at or (n) to display result : " conditioned_column
 			
 			
-			if [ $conditioned_column -gt  $num_of_columns  ] 
+			if [[ ! $conditioned_column  =~ ^[1-9]+$ ||  $conditioned_column -gt $num_of_columns ]]
 			then
 				echo "invalid number"
 				continue  
@@ -93,9 +117,12 @@ conditioned_table(){
 			if [ $conditioned_column = "n" ] 
 			then
 				break 
-			fi  
+			fi
+			  
+			# get column type 
 			C_type=$(sed -n "${conditioned_column}p" <<< "$columns" | awk -F: '{print $2}')
 			echo $C_type
+			
 			if [ $C_type = INT ]
 			then
 				select option in "==" ">" "<"; do
@@ -108,7 +135,7 @@ conditioned_table(){
 					    awk -F: -v value="$value" -v column="$conditioned_column" '{ if ($column == value) print }' /tmp/$1  >  /tmp/con_temp
 					    mv /tmp/con_temp /tmp/$1
 					    
-					    read -p "do u want to add another condition (y|n)"  conTinue
+					    read -p "do u want to add another condition (y|n): "  conTinue
 					    
 							      
 					    if [ $conTinue = "y" ] 
@@ -131,7 +158,7 @@ conditioned_table(){
 					    awk -F: -v value="$value" -v column="$conditioned_column" '{ if ($column > value) print }' /tmp/$1  >  /tmp/con_temp
 					    mv /tmp/con_temp /tmp/$1
 					    
-					    read -p "do u want to add another condition (y|n)"  conTinue
+					    read -p "do u want to add another condition (y|n): "  conTinue
 					    
 							      
 					    if [ $conTinue = "y" ] 
@@ -155,7 +182,7 @@ conditioned_table(){
 					    awk -F: -v value="$value" -v column="$conditioned_column" '{ if ($column < value) print }' /tmp/$1  >  /tmp/con_temp
 					    mv /tmp/con_temp /tmp/$1
 					    
-					    read -p "do u want to add another condition (y|n)"  conTinue
+					    read -p "do u want to add another condition (y|n): "  conTinue
 					    
 							      
 					    if [ $conTinue = "y" ] 
@@ -188,7 +215,7 @@ conditioned_table(){
 					    awk -F: -v value="$value" -v column="$conditioned_column" '{ if ($column == value) print }' /tmp/$1  >  /tmp/con_temp
 					    mv /tmp/con_temp /tmp/$1
 					    
-					    read -p "do u want to add another condition (y|n)"  conTinue
+					    read -p "do u want to add another condition (y|n): "  conTinue
 					    
 							      
 					    if [ $conTinue = "y" ] 
@@ -229,7 +256,7 @@ conditioned_table(){
 select_table(){	
 	while true 
 	do 
-		read -p "Enter Table Name" TableName
+		read -p "Enter Table Name: " TableName
 		
 		if [ -f $default_path/$connectedDB/tables/$TableName ]
 		then
@@ -241,13 +268,13 @@ select_table(){
 		select option in "Conditioned" "NotCondition" "Exit"; do
 		    case $option in
 			"Conditioned")
-			    # for conditioned
+			
 			    conditioned_table $TableName
 			    
 			    return 
 			    ;;
 			"NotCondition")
-			     select_display_menu $TableName $default_path/$connectedDB/tables/$TableName  $default_path/$connectedDB/metadata/$TableName_meta
+			     select_display_menu $TableName $default_path/$connectedDB/tables/$TableName  $default_path/$connectedDB/metadata/${TableName}_meta
 			     return
 			    ;;
 			"Exit")
