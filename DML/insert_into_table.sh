@@ -2,7 +2,11 @@
 
 shopt -s extglob
 
-echo "insert into table script! ${1} database"
+echo "----------------------------------"
+echo "-----  Insert into table    ------"
+echo "----------------------------------"
+echo
+
 
 # ask the user for the table name
 read -p "Enter the name of the table: " table_name
@@ -44,6 +48,10 @@ then
         # read user input
         input_value=""
         read -p "> " input_value
+        input_value="${input_value//[[:space:]]/}"
+
+        
+        echo
 
         # validate constraints
 
@@ -55,16 +63,20 @@ then
                 if [[ $input_value == "$current_value" ]]; then
                     echo "Error: Duplicate value for '$col_constraint' column '$col_name'."
                     error_flag=true
+                    echo
+                    echo "----------------------------------------"
                     break 2 # exit both loops
                 fi
             done
         fi
 
-        # NOT NULL and PK constraint
-        if [[ $col_constraint == "NOT NULL" ]] || [[ $col_constraint == "PK" ]]; then
+        # NOT_NULL and PK constraint
+        if [[ $col_constraint == "NOT_NULL" ]] || [[ $col_constraint == "PK" ]]; then
             if [[ -z $input_value ]] || [[ $input_value == "null" ]] || [[ $input_value == "NULL" ]] || [[ $input_value == " " ]]; then
                 echo "Error: NULL value not allowed for column '$col_name'."
                 error_flag=true
+                echo
+                echo "----------------------------------------"
                 break 2 # exit both loops
             fi
         fi
@@ -131,14 +143,16 @@ then
         # insert the row into the table
         echo "${row_values:1}" >> "${current_db}/tables/${table_name}"
         echo "Row inserted successfully into table '$table_name'."
-        echo "----------------------------------------"
         echo
+        echo "----------------------------------------"
     fi
 
 
 else
     # table does not exist
     echo "Table '$table_name' does not exist in database."
+    echo
+    echo "----------------------------------------"
 fi
 
 

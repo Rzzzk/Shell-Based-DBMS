@@ -1,17 +1,20 @@
 #! /usr/bin/bash
 
 
+echo "----------------------------------"
+echo "------   Update table       ------"
+echo "----------------------------------"
+echo
+
+
 shopt -s extglob
 
 #! /usr/bin/bash
 
 shopt -s extglob
 
-echo "Update table script! ${1} database"
-
 # ask the user for the table name
 read -p "Enter the name of the table: " table_name
-
 
 # check if the table already exists
 if [ -f "${current_db}/tables/${table_name}" ]
@@ -57,7 +60,8 @@ then
         echo "Enter new value for column ${col_name} Type: ${col_dtype}, Constraint: ${col_constraint}"
         read -p "> " input_value
 
-
+        input_value="${input_value//[[:space:]]/}"
+        
         # validate constraints
 
         # UNIQUE and PK constraint
@@ -73,11 +77,13 @@ then
         fi
         ##########################################################
 
-        # NOT NULL and PK constraint
-        if [[ $col_constraint == "NOT NULL" ]] || [[ $col_constraint == "PK" ]]; then
+        # NOT_NULL and PK constraint
+        if [[ $col_constraint == "NOT_NULL" ]] || [[ $col_constraint == "PK" ]]; then
             if [[ -z $input_value ]] || [[ $input_value == "null" ]] || [[ $input_value == "NULL" ]] || [[ $input_value == " " ]]; then
                 echo "Error: NULL value not allowed for column '$col_name'."
                 error_flag=true
+                echo
+                echo "----------------------------------------"
             fi
         fi
         ##########################################################
@@ -97,6 +103,8 @@ then
                     # invalid input
                     echo "Invalid input. Expected a INT value."
                     error_flag=true
+                    echo
+                    echo "----------------------------------------"
                 fi
 
                 ;;
@@ -134,8 +142,8 @@ then
 
 
         if [[ $error_flag == false ]]; then
-            echo "Good value to update"
-            echo "${column_data[@]}" 
+            #echo "Good value to update"
+            #echo "${column_data[@]}" 
 
             # user enter a condition to identify which rows to update
             # ex: update where id=5 or name='Ahmed'or age>30
@@ -164,10 +172,10 @@ then
 
                 # get the data of the condition column
                 condition_column_data=($(awk -F':' -v idx=$((condition_column_index+1)) '{print $idx}' ${current_db}/tables/${table_name}))
-                echo "Condition column data: ${condition_column_data[@]}"
+                #echo "Condition column data: ${condition_column_data[@]}"
 
                 # print confirmation
-                echo "Condition column '$condition_column' found in table '$table_name'."
+                #echo "Condition column '$condition_column' found in table '$table_name'."
 
                 # iterate through the condition column data to find matching rows
                 for (( i=0; i<${#condition_column_data[@]}; i++ ))
@@ -193,7 +201,7 @@ then
 
                     # if row matches condition, update it
                     if [[ $match == true ]]; then
-                        echo "Updating row $((i+1))"
+                        #echo "Updating row $((i+1))"
 
                         # read the entire row and update the specific column
                         row_data=($(awk -F':' -v row=$((i+1)) '{if(NR==row) print $0}' ${current_db}/tables/${table_name}))
@@ -214,7 +222,7 @@ then
 
                         # return the updated row as a string
                         updated_row=$(IFS=':'; echo "${row_array[*]}")
-                        echo "Updated row data: $updated_row"
+                        #echo "Updated row data: $updated_row"
 
                         # so the row number i+1 needs to be updated in the table file
                         # use sed to update the specific line in the file
@@ -225,11 +233,16 @@ then
                 done
 
                 echo "Update completed successfully."
+                echo
+                echo "----------------------------------------"
 
 
             fi
+        else 
 
-                 
+            echo
+            echo "----------------------------------------"
+       
         fi
 
 
@@ -241,6 +254,8 @@ then
 else
     # table does not exist
     echo "Table '$table_name' does not exist in database."
+    echo
+    echo "----------------------------------------"
 fi
 
 

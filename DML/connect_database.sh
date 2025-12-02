@@ -41,22 +41,25 @@ then
       select opt in "${option[@]}"; do
          case $REPLY in
                1) source ./DML/list_tables.sh
-               break
+                  break
                   ;;
                2) source ./DDL/Tables/create_table.sh
-               break
+                  break
                   ;;
-               3) source ./DDL/Tables/drop_table.sh "$current_db"
-               break
+               3) source ./DDL/Tables/drop_table.sh
+                  break
                   ;;
-               4) source ./DML/insert_into_table.sh "$current_db"
-               break
+               4) source ./DML/insert_into_table.sh
+                  break
                   ;;
-               5) source ./DML/update_table.sh "$current_db"
+               5) source ./DML/update_table.sh
+                  break
                   ;;
-               6) source ./DML/select_from_table.sh "$current_db"
+               6) source ./DML/select_from_table.sh
+                  break
                   ;;
-               7) source ./DML/delete_from_table.sh "$current_db"
+               7) source ./DML/delete_from_table.sh
+                  break
                   ;;
                8) echo "Returning to Main Menu."
                   break 2
