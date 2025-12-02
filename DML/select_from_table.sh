@@ -241,13 +241,13 @@ select_table(){
 		select option in "Conditioned" "NotCondition" "Exit"; do
 		    case $option in
 			"Conditioned")
-			    # for conditioned
+			
 			    conditioned_table $TableName
 			    
 			    return 
 			    ;;
 			"NotCondition")
-			     select_display_menu $TableName $default_path/$connectedDB/tables/$TableName  $default_path/$connectedDB/metadata/$TableName_meta
+			     select_display_menu $TableName $default_path/$connectedDB/tables/$TableName  $default_path/$connectedDB/metadata/${TableName}_meta
 			     return
 			    ;;
 			"Exit")
