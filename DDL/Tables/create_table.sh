@@ -44,7 +44,7 @@ if [[ "${is_name_valid}" == "yes" ]]; then
 
         is_pk_selected="no" # to prevent the duplication of PK
         declare -a col_names # to prevent the duplication of column names
-	col_names=()
+	    col_names=()
         for (( i=1; i<=num_columns; i++ ))
         do
             #### Column name
@@ -68,7 +68,7 @@ if [[ "${is_name_valid}" == "yes" ]]; then
 
                     if [[ "$found" == "yes" ]]; then
                         echo "ERROR: Other column with tha same name, enter other name"
-            		zenity --error --text="Other column with tha same name, enter other name"
+            		    zenity --error --text="Other column with tha same name, enter other name"
                         
                     else
                         col_names[$i]="${column_name}"
@@ -87,10 +87,10 @@ if [[ "${is_name_valid}" == "yes" ]]; then
             #type_options=("INT" "STRING")
             while true; do
             	
-	    type_options=$(zenity --list --title="Select data type for column $i" \
-				    --column="data_type" \
-				    "INT" \
-				    "STRING")
+	        type_options=$(zenity --list --title="Select data type for column $i" \
+                        --column="data_type" \
+                        "INT" \
+                        "STRING")
                     case $type_options in
                         "INT")  column_type="INT"
                             break 
@@ -110,7 +110,7 @@ if [[ "${is_name_valid}" == "yes" ]]; then
             #constraint_options=("PK" "NOT_NULL" "UNIQUE" "NONE")
             while true; do
             
-	    constraint_options=$(zenity --list --title="Select constraint for column $i" \
+	        constraint_options=$(zenity --list --title="Select constraint for column $i" \
 				    --column="constraint" \
 				    "PK" \
 				    "NOT_NULL" \
@@ -146,6 +146,63 @@ if [[ "${is_name_valid}" == "yes" ]]; then
             done
             echo "$column_name:$column_type:$column_const" >> "${current_db}/metadata/${table_name}_meta"
         done
+
+if [[ ${is_pk_selected} == "no" ]]; then
+
+    # Read metadata arrays
+    column_names=($(awk -F: '{print $1}' "${current_db}/metadata/${table_name}_meta"))
+    column_dtypes=($(awk -F: '{print $2}' "${current_db}/metadata/${table_name}_meta"))
+    column_constraints=($(awk -F: '{print $3}' "${current_db}/metadata/${table_name}_meta"))
+    column_num=${#column_names[@]}
+
+    # Prepare list for Zenity
+    zenity_list=()
+    for name in "${column_names[@]}"; do
+        zenity_list+=("$name")
+    done
+
+    # Show Zenity selection dialog
+    col_name=$(zenity --list \
+        --title="Select Primary Key" \
+        --text="Choose a column to be the primary key" \
+        --column="Columns" \
+        "${zenity_list[@]}")
+
+    # If user presses Cancel
+    if [[ $? -ne 0 || -z "$col_name" ]]; then
+        zenity --error --text="You must select a primary key!"
+        exit 1
+    fi
+
+    # Find column index (case-insensitive)
+    update_column_index=-1
+    for (( i=0; i<column_num; i++ )); do
+        if [[ "${column_names[$i]^^}" == "${col_name^^}" ]]; then
+            update_column_index=$i
+            break
+        fi
+    done
+
+    if [[ $update_column_index -eq -1 ]]; then
+        zenity --error --text="Error: Column not found!"
+        exit 1
+    fi
+
+    # Update column constraint
+    column_constraints[$update_column_index]="PK"
+
+    # Rebuild metadata file
+    : > "${current_db}/metadata/${table_name}_meta"
+    for (( i=0; i<column_num; i++ )); do
+        echo "${column_names[$i]}:${column_dtypes[$i]}:${column_constraints[$i]}" \
+            >> "${current_db}/metadata/${table_name}_meta"
+    done
+
+    zenity --info --text="Primary key has been set to: ${column_names[$update_column_index]}"
+
+    fi
+
+
         echo
         echo "-------------------------"
     fi
