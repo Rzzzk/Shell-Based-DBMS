@@ -62,7 +62,19 @@ delete_table(){
 				    
 				    case $option in
 					"==")
-					    value=$(zenity --entry --title="Value" --text="enter value") 
+					    while true 
+					    do
+						    value=$(zenity --entry --title="Value" --text="enter value") 
+						    
+						    # if value is not number break 
+						    if [[ $value =~ ^-?[0-9]+$ ]]; then
+							echo "You entered a valid integer: $value"
+							break
+						    else	
+						    	
+						    		zenity --error  --text="invalid input"
+						    fi
+					    done
 					    # awk comparsion
 					    awk -F: -v value="$value" -v column="$conditioned_column" '{ if ($column != value) print }' /tmp/$TableName  >  /tmp/con_temp
 					    mv /tmp/con_temp /tmp/$TableName
@@ -84,7 +96,19 @@ delete_table(){
 					    ;;
 					">")
 					    
-					    value=$(zenity --entry --title="Value" --text="enter value")     # awk comparsion
+					    while true 
+					    do
+						    value=$(zenity --entry --title="Value" --text="enter value") 
+						    
+						    # if value is not number break 
+						    if [[ $value =~ ^-?[0-9]+$ ]]; then
+							echo "You entered a valid integer: $value"
+							break
+						    else	
+						    	
+						    		zenity --error  --text="invalid input"
+						    fi
+					    done   # awk comparsion
 					    awk -F: -v value="$value" -v column="$conditioned_column" '{ if ($column <= value) print }' /tmp/$TableName  >  /tmp/con_temp
 					    mv /tmp/con_temp /tmp/$TableName
 					    
@@ -106,7 +130,19 @@ delete_table(){
 					    ;;
 					"<")
 					    
-					    value=$(zenity --entry --title="Value" --text="enter value") 
+					    while true 
+					    do
+						    value=$(zenity --entry --title="Value" --text="enter value")
+						    
+						    # if value is not number break 
+						    if [[ $value =~ ^-?[0-9]+$ ]]; then
+							echo "You entered a valid integer: $value"
+							break
+						    else	
+						    	
+						    		zenity --error  --text="invalid input"
+						    fi
+					    done
 					    # awk comparsion
 					    awk -F: -v value="$value" -v column="$conditioned_column" '{ if ($column >= value) print }' /tmp/$TableName  >  /tmp/con_temp
 					    mv /tmp/con_temp /tmp/$TableName

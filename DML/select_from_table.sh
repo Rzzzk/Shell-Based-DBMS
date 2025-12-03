@@ -144,7 +144,19 @@ conditioned_table(){
 				    case $option in
 					"==")
 					    # awk on /tmp/$1
-					    value=$(zenity --entry --title="Value" --text="enter value") 
+					    while true 
+					    do
+						    value=$(zenity --entry --title="Value" --text="enter value") 
+						    
+						    # if value is not number break 
+						    if [[ $value =~ ^-?[0-9]+$ ]]; then
+							echo "You entered a valid integer: $value"
+							break
+						    else	
+						    	
+						    		zenity --error  --text="invalid input"
+						    fi
+					    done
 					    #read -p "enter value : " value
 					    # awk comparsion
 					    awk -F: -v value="$value" -v column="$conditioned_column" '{ if ($column == value) print }' /tmp/$1  >  /tmp/con_temp
@@ -166,7 +178,19 @@ conditioned_table(){
 					">")
 					    
 					    
-					    value=$(zenity --entry --title="Value" --text="enter value") 
+					    while true 
+					    do
+						    value=$(zenity --entry --title="Value" --text="enter value") 
+						    
+						    # if value is not number break 
+						    if [[ $value =~ ^-?[0-9]+$ ]]; then
+							echo "You entered a valid integer: $value"
+							break
+						    else	
+						    	
+						    		zenity --error  --text="invalid input"
+						    fi
+					    done
 					    #read -p "enter value : " value
 					    # awk comparsion
 					    awk -F: -v value="$value" -v column="$conditioned_column" '{ if ($column > value) print }' /tmp/$1  >  /tmp/con_temp
@@ -192,7 +216,19 @@ conditioned_table(){
 					"<")
 					
 					    
-					    value=$(zenity --entry --title="Value" --text="enter value") 
+					    while true 
+					    do
+						    value=$(zenity --entry --title="Value" --text="enter value") 
+						    
+						    # if value is not number break 
+						    if [[ $value =~ ^-?[0-9]+$ ]]; then
+							echo "You entered a valid integer: $value"
+							break
+						    else	
+						    	
+						    		zenity --error  --text="invalid input"
+						    fi
+					    done
 					    #read -p "enter value : " value
 					    # awk comparsion
 					    awk -F: -v value="$value" -v column="$conditioned_column" '{ if ($column < value) print }' /tmp/$1  >  /tmp/con_temp
