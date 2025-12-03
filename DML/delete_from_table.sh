@@ -10,32 +10,34 @@ delete_table(){
 
 	#cat /tmp/$1
 	echo "*******************"	
-	while true 
-	do 
-		read -p "Enter Table Name: " TableName
-		
-		if [ -f $default_path/$connectedDB/tables/$TableName ]
-		then
-			break 
+	while true; do
+		# Ask for Table Name using zenity entry box
+		TableName=$(zenity --entry --title="Enter Table Name" --text="Enter the table name:")
+
+		# Check if the table exists
+		if [ -f "$default_path/$connectedDB/tables/$TableName" ]; then
+		    break  # Table exists, break the loop
 		else
-			echo "table doesn't exist "
+		    # Table doesn't exist, show error message
+		    zenity --error --text="Table '$TableName' doesn't exist. Please try again."
 		fi
-	done 	
+	    done
 	
 	cp $default_path/$connectedDB/tables/$TableName  /tmp/$TableName
 	
 	while true
 			do
-				
+			# get the column names numerated 	
 			columns=$(cut -d ":" -f 1,2 "$default_path/$connectedDB/metadata/${TableName}_meta")
 			num_of_columns=$(wc -l < "$default_path/$connectedDB/metadata/${TableName}_meta")
-			echo "$columns" | nl -s " - " -w 1
-			read -p "enter the column number u want to be conditioned at or (n) to display result : " conditioned_column
+			enumerated_col=$(echo "$columns" | nl -s " - " -w 1)
 			
+			conditioned_column=$(zenity --entry --title="Codition" --text="$enumerated_col \n 
+			enter the column number u want to be conditioned at or (n) to display result :")   
 			
 			if [[ ! $conditioned_column  =~ ^[1-9]+$ ||  $conditioned_column -gt $num_of_columns ]]
 			then
-				echo "invalid number"
+		   		 zenity --error --text="Invalid Column number"
 				continue  
 			fi  
 			
@@ -51,115 +53,121 @@ delete_table(){
 			
 			if [ $C_type = INT ]
 			then
-				select option in "==" ">" "<"; do
+				#select option in "==" ">" "<"; do
+				option=$(zenity --list --title="Select Operator for the condition " \
+				    --column="Operator" \
+				    "==" \
+				    ">" \
+				    "<")
+				    
 				    case $option in
 					"==")
-					    
-					    read -p "enter value : " value
+					    value=$(zenity --entry --title="Value" --text="enter value") 
 					    # awk comparsion
 					    awk -F: -v value="$value" -v column="$conditioned_column" '{ if ($column != value) print }' /tmp/$TableName  >  /tmp/con_temp
 					    mv /tmp/con_temp /tmp/$TableName
 					    
-					    read -p "do u want to add another condition (y|n)"  conTinue
 					    
-							      
-					    if [ $conTinue = "y" ] 
-					    then
-					    		break 
-					    
-					    else 
-					    		break 2 
-					    
-					    fi  
-					    
-					    
+						
+					    if zenity --question \
+						    --title="Add Another Condition?" \
+						    --text="Do you want to add another condition?" \
+						    --ok-label="Yes" \
+						    --cancel-label="No"
+						 then
+						 	continue
+					    else
+					   	   break 
+					    fi
+						
 					    
 					    ;;
 					">")
 					    
-					
-					    read -p "enter value : " value
-					    # awk comparsion
+					    value=$(zenity --entry --title="Value" --text="enter value")     # awk comparsion
 					    awk -F: -v value="$value" -v column="$conditioned_column" '{ if ($column <= value) print }' /tmp/$TableName  >  /tmp/con_temp
 					    mv /tmp/con_temp /tmp/$TableName
 					    
-					    read -p "do u want to add another condition (y|n)"  conTinue
-					    
-							      
-					    if [ $conTinue = "y" ] 
-					    then
-					    		break 
-					    
-					    else 
-					    		break 2 
-					    
-					    fi  
-					    
+					    if zenity --question \
+						    --title="Add Another Condition?" \
+						    --text="Do you want to add another condition?" \
+						    --ok-label="Yes" \
+						    --cancel-label="No"
+						 then
+						 	continue
+					    else
+					   	   break 
+					    fi
+						
 					    
 					
 					
 					    break
 					    ;;
 					"<")
-					
-					    read -p "enter value : " value
+					    
+					    value=$(zenity --entry --title="Value" --text="enter value") 
 					    # awk comparsion
 					    awk -F: -v value="$value" -v column="$conditioned_column" '{ if ($column >= value) print }' /tmp/$TableName  >  /tmp/con_temp
 					    mv /tmp/con_temp /tmp/$TableName
 					    
-					    read -p "do u want to add another condition (y|n)"  conTinue
 					    
-							      
-					    if [ $conTinue = "y" ] 
-					    then
-					    		break 
-					    
-					    else 
-					    		break 2 
-					    
-					    fi  
+					    if zenity --question \
+						    --title="Add Another Condition?" \
+						    --text="Do you want to add another condition?" \
+						    --ok-label="Yes" \
+						    --cancel-label="No"
+						 then
+						 	continue
+					    else
+					   	   break 
+					    fi
+						
 					    
 					    
 					    
 					    break
 					    ;;
 					*)
-					    echo "Invalid option. Try again."
+						zenity --error --text="Invalid Choice "
 					    ;;
 				    esac
-				done
 			   
 			   else 
 			   # is string 
-			   select option in "==" ; do
+			   option=$(zenity --list --title="Select Operator for the condition " \
+				    --column="Operator" \
+				    "==" ) 
+			   #select option in "==" ; do
 				    case $option in
 					"==")
-					    read -p "enter value : " value
+					    
+					    value=$(zenity --entry --title="Value" --text="enter value") 
 					    # awk comparsion
 					    awk -F: -v value="$value" -v column="$conditioned_column" '{ if ($column != value) print }' /tmp/$TableName  >  /tmp/con_temp
 					    mv /tmp/con_temp /tmp/$TableName
 					    
-					    read -p "do u want to add another condition (y|n)"  conTinue
 					    
-							      
-					    if [ $conTinue = "y" ] 
-					    then
-					    		break 
-					    
-					    else 
-					    		break 2 
-					    
-					    fi  
+					    if zenity --question \
+						    --title="Add Another Condition?" \
+						    --text="Do you want to add another condition?" \
+						    --ok-label="Yes" \
+						    --cancel-label="No"
+						 then
+						 	continue
+					    else
+					   	   break 
+					    fi
+						
 					    
 					    
 					    
 					    ;;
 					"*")
-						"invalid"
+					
+						zenity --error --text="Invalid Choice "
 						;;
 			   	      esac
-			   done
-			   
 			   
 			fi
 				
