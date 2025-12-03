@@ -45,4 +45,5 @@ else
     echo "Invalid Name"
     echo
     echo "-------------------------"
+    zenity --error --text="Invalid Name"
 fi

@@ -44,7 +44,7 @@ if [[ "${is_name_valid}" == "yes" ]]; then
 
         is_pk_selected="no" # to prevent the duplication of PK
         declare -a col_names # to prevent the duplication of column names
-
+	col_names=()
         for (( i=1; i<=num_columns; i++ ))
         do
             #### Column name
