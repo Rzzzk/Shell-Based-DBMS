@@ -13,7 +13,8 @@ echo
 
 # ask the user for the database name
 db_name=""
-read -p "Enter the name of the database to create: " db_name
+#read -p "Enter the name of the database to create: " db_name
+db_name=$(zenity --entry --title="Enter Database Name" --text="Enter the name of the database to create: ")
 
 # check if the database name is accepted.
 is_name_valid=$(./Helper_Scripts/name_validation.sh "$db_name")
@@ -28,6 +29,7 @@ if [[ "${is_name_valid}" == "yes" ]]; then
         echo "Please choose a different name."
         echo
         echo "-------------------------"
+        zenity --error --text="Database already exists"
     else
         # create the database directory
         mkdir -p "$DATA_BASES_DIR/$db_name/tables"
@@ -36,6 +38,7 @@ if [[ "${is_name_valid}" == "yes" ]]; then
         echo "Database '$db_name' created successfully."
         echo
         echo "-------------------------"
+        zenity --info --text="Database created "
     fi
 
 else
