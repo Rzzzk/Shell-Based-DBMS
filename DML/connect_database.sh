@@ -36,7 +36,7 @@ if [ -d "$DATA_BASES_DIR/$db_name" ]; then
             source ./DDL/Tables/create_table.sh
             ;;
          "Drop Table") 
-            source ./DDL/Tables/drop_table.sh
+            source ./DDL/Tables/drop_table.sh   "$current_db"
             ;;
          "Insert into Table") 
             source ./DML/insert_into_table.sh
