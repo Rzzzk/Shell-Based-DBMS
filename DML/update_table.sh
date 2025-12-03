@@ -1,27 +1,25 @@
 #! /usr/bin/bash
 
-
-echo "----------------------------------"
-echo "------   Update table       ------"
-echo "----------------------------------"
-echo
-
-
+# (Removed duplicate shebang and shopt from original snippet)
 shopt -s extglob
 
-#! /usr/bin/bash
-
-shopt -s extglob
+# REPLACED: Header echos with a Zenity notification or just title usage in dialogs.
+# echo "----------------------------------"
+# echo "------   Update table       ------"
+# echo "----------------------------------"
 
 # ask the user for the table name
-read -p "Enter the name of the table: " table_name
+# REPLACED: read -p "Enter the name of the table: " table_name
+table_name=$(zenity --entry --title="Update Table" --text="Enter the name of the table to update:")
+
+table_name="${table_name//[[:space:]]/}"
 
 # check if the table already exists
 if [ -f "${current_db}/tables/${table_name}" ]
 then
-    
 
-    echo "Table '$table_name' exists in database."
+    # REPLACED: echo "Table '$table_name' exists in database." 
+    # (Silent success, moving to next step)
 
     # get the column info from the metadata file
     column_names=($(awk 'BEGIN { FS=":"; OFS=" " } { print $1 }' ${current_db}/metadata/${table_name}_meta))
@@ -31,13 +29,16 @@ then
 
 
     # which column to update
-    read -p "Enter the name of the column to update: " col_name
+    # REPLACED: echo "Columns ${column_names[@]}" and read -p
+    # STRATEGY: Use a List dialog so user can't make a typo
+    col_name=$(zenity --list --title="Select Column" --text="Select the column to update:" --column="Column Name" "${column_names[@]}")
+    col_name="${col_name//[[:space:]]/}"
 
     # check if the column exists
     update_column_index=-1
     for (( i=0; i<column_num; i++ ))
     do
-        if [[ "${column_names[$i]}" == "$col_name" ]]; then
+        if [[ "${column_names[$i]^^}" == "${col_name^^}" ]]; then
             update_column_index=$i
             break
         fi
@@ -46,9 +47,10 @@ then
     
 
     if [[ $update_column_index -eq -1 ]]; then
-        echo "Column '$col_name' does not exist in table '$table_name'."
+        # REPLACED: echo "Column '$col_name' does not exist..."
+        zenity --error --text="Column '$col_name' does not exist in table '$table_name'."
     else
-        echo "Updating column '$col_name' in table '$table_name'."
+        # REPLACED: echo "Updating column..." (Silent processing)
 
         col_dtype=${column_dtypes[$update_column_index]^^} # convert to uppercase
         col_constraint=${column_constraints[$update_column_index]^^} # convert to uppercase
@@ -57,9 +59,9 @@ then
 
         error_flag=false 
 
-        echo "Enter new value for column ${col_name} Type: ${col_dtype}, Constraint: ${col_constraint}"
-        read -p "> " input_value
-
+        # REPLACED: echo "Enter new value..." and read -p
+        input_value=$(zenity --entry --title="Update Value" --text="Enter new value for column ${col_name} \nType: ${col_dtype}\nConstraint: ${col_constraint}")
+        
         input_value="${input_value//[[:space:]]/}"
         
         # validate constraints
@@ -70,7 +72,8 @@ then
             for current_value in "${column_data[@]}"
             do
                 if [[ $input_value == "$current_value" ]]; then
-                    echo "Error: Duplicate value for '$col_constraint' column '$col_name'."
+                    # REPLACED: echo Error
+                    zenity --error --text="Error: Duplicate value for '$col_constraint' column '$col_name'."
                     error_flag=true
                 fi
             done
@@ -79,11 +82,10 @@ then
 
         # NOT_NULL and PK constraint
         if [[ $col_constraint == "NOT_NULL" ]] || [[ $col_constraint == "PK" ]]; then
-            if [[ -z $input_value ]] || [[ $input_value == "null" ]] || [[ $input_value == "NULL" ]] || [[ $input_value == " " ]]; then
-                echo "Error: NULL value not allowed for column '$col_name'."
+            if [[ -z $input_value ]] || [[ $input_value == "null" ]] || [[ $input_value == "NULL" ]] || [[ -z "${input_value//[[:space:]]/}" ]]; then
+                # REPLACED: echo Error
+                zenity --error --text="Error: NULL value not allowed for column '$col_name'."
                 error_flag=true
-                echo
-                echo "----------------------------------------"
             fi
         fi
         ##########################################################
@@ -95,16 +97,18 @@ then
             +([0-9]))
                 input_value="$input_value"
                 ;;
+            +([' ']))
+                row_values+=":null"
+                ;;
             *)  
                 # check for null input
-                if [[ -z $input_value ]] || [[ $input_value == "null" ]] || [[ $input_value == "NULL" ]] || [[ $input_value == " " ]]; then
+                if [[ -z $input_value ]] || [[ $input_value == "null" ]] || [[ $input_value == "NULL" ]] || [[ -z "${input_value//[[:space:]]/}" ]]; then
                 input_value="null"
                 else
                     # invalid input
-                    echo "Invalid input. Expected a INT value."
+                    # REPLACED: echo Invalid input
+                    zenity --error --text="Invalid input. Expected a INT value."
                     error_flag=true
-                    echo
-                    echo "----------------------------------------"
                 fi
 
                 ;;
@@ -114,8 +118,12 @@ then
             case $input_value in
             +([0-9]))
                 # invalid input
-                echo "Invalid input. Expected a STRING value."
+                # REPLACED: echo Invalid input
+                zenity --error --text="Invalid input. Expected a STRING value."
                 error_flag=true
+                ;;
+            +([' ']))
+                row_values+=":null"
                 ;;
             +([A-z]|[' ']))
                 input_value="$input_value"
@@ -125,15 +133,15 @@ then
                 ;;
             *)
                 # check for null input
-                if [[ -z $input_value ]] || [[ $input_value == "null" ]] || [[ $input_value == "NULL" ]] || [[ $input_value == " " ]]; then
-                row_values="null"
+                if [[ -z $input_value ]] || [[ $input_value == "null" ]] || [[ $input_value == "NULL" ]] || [[ -z "${input_value//[[:space:]]/}" ]]; then
+                    input_value="null"
                 else
                     # invalid input
-                    echo "Invalid input. Expected a string value."
+                    # REPLACED: echo Invalid input
+                    zenity --error --text="Invalid input. Expected a string value."
                     error_flag=true
+                    break
                 fi
-
-                break
                 ;;
             esac
             
@@ -147,19 +155,25 @@ then
 
             # user enter a condition to identify which rows to update
             # ex: update where id=5 or name='Ahmed'or age>30
-
-            read -p "Enter the condition to identify rows to update (e.g., id=5): " condition
-
+            
+            # REPLACED: echo available conditions and read -p
+            condition=$(zenity --entry --title="Where Condition" --text="Enter condition to identify rows (e.g., col>5)\nAvailable ops: [=, >, <]")
+            
             # parse the condition
             condition_column=$(echo $condition | awk -F'[=<>]' '{print $1}')
             condition_operator=$(echo $condition | grep -o '[=<>]' )
             condition_value=$(echo $condition | awk -F'[=<>]' '{print $2}')
+            # handle spaces
+            condition_column="${condition_column//[[:space:]]/}"
+            condition_operator="${condition_operator//[[:space:]]/}"
+            condition_value="${condition_value//[[:space:]]/}"
+            
 
             # find the index of the condition column
             condition_column_index=-1
             for (( i=0; i<column_num; i++ ))
             do
-                if [[ "${column_names[$i]}" == "$condition_column" ]]; then
+                if [[ "${column_names[$i]^^}" == "${condition_column^^}" ]]; then
                     condition_column_index=$i
                     break
                 fi
@@ -167,7 +181,8 @@ then
 
             # check if the condition column exists
             if [[ $condition_column_index -eq -1 ]]; then
-                echo "Condition column '$condition_column' does not exist in table '$table_name'."
+                # REPLACED: echo error
+                zenity --error --text="Condition column '$condition_column' does not exist in table '$table_name'."
             else
 
                 # get the data of the condition column
@@ -227,37 +242,25 @@ then
                         # so the row number i+1 needs to be updated in the table file
                         # use sed to update the specific line in the file
                         sed -i "$((i+1))s/.*/$updated_row/" ${current_db}/tables/${table_name}
-                        echo "Row $((i+1)) updated successfully."
+                        
+                        zenity --info --title="Success" --text="Row $((i+1)) updated successfully."
                         
                     fi
                 done
 
-                echo "Update completed successfully."
-                echo
-                echo "----------------------------------------"
-
+                # REPLACED: echo success
+                zenity --info --title="Success" --text="Update completed successfully."
 
             fi
         else 
-
-            echo
-            echo "----------------------------------------"
-       
+            # Place holder for else block if needed
+            :
         fi
-
-
         
     fi
 
-    
-
 else
     # table does not exist
-    echo "Table '$table_name' does not exist in database."
-    echo
-    echo "----------------------------------------"
+    # REPLACED: echo error
+    zenity --error --text="Table '$table_name' does not exist in database."
 fi
-
-
-
-
