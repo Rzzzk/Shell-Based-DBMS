@@ -1,43 +1,49 @@
-#! /usr/bin/bash
+#!/bin/bash
 
-# start the DBMS
-echo "Welcome to our DBMS!"
+# Start the DBMS
+zenity --info --text="Welcome to our DBMS!" --title="DBMS" 
 
-# start the main loop
+# Start the main loop
 while true; do
+    # Display options to the user using Zenity's --list option
+    optuins=("Create Database" "List Databases" "Connect to Database" "Drop Database" "Clear" "Exit")
     
-   # show the main menu using
-   optuins=("Create Database" "List Databases" "Connect to Database" "Drop Database" "Clear" "Exit")
-   echo "Main Menu:"
+    # Create a selection dialog with Zenity
+    choice=$(zenity --list --title="Main Menu" --column="Option" "${optuins[@]}")
 
-   # display options to the user 
-   # prompt the user to select an option
-   # use a select loop to handle user input
-   select opt in "${optuins[@]}"; do
-      case $REPLY in
-         1) source ./DDL/DB/create_database.sh
-            break # exit the select loop to return to the main loop and show the menu again
+    # Check the user's choice and act accordingly
+    case $choice in
+        "Create Database")
+            # Run the create_database.sh script
+            ./DDL/DB/create_database.sh
             ;;
-         2) source ./DDL/DB/list_databases.sh
-            break # exit the select loop to return to the main loop and show the menu again
+        "List Databases")
+            # Run the list_databases.sh script
+            ./DDL/DB/list_databases.sh
             ;;
-         3) source ./DML/connect_database.sh
-            break # exit the select loop to return to the main loop and show the menu again
+        "Connect to Database")
+            # Run the connect_database.sh script
+            ./DML/connect_database.sh
             ;;
-         4) source ./DDL/DB/drop_database.sh
-            break # exit the select loop to return to the main loop and show the menu again
+        "Drop Database")
+            # Run the drop_database.sh script
+            ./DDL/DB/drop_database.sh
             ;;
-         5) clear # clear the terminal screen
-            break # exit the select loop to return to the main loop and show the menu again
+        "Clear")
+            # Clear the terminal screen
+            clear
             ;;
-         6) echo "Exiting the DBMS. Goodbye!"
-            break 2 # exit both loops (the select and the while)
+        "Exit")
+            # Exit the DBMS
+            zenity --info --text="Exiting the DBMS. Goodbye!" --title="Goodbye"
+            break # Exit the main loop
             ;;
-         *) echo "Invalid option. Please try again."
-            break # exit the select loop to return to the main loop and show the menu again
+        *)
+            # Handle invalid option (this should never happen)
+            zenity --error --text="Invalid option. Please try again." --title="Error"
             ;;
-      esac
-   done
-
+    esac
 done
-# end the DBMS
+
+# End the DBMS
+
