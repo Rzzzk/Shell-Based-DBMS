@@ -10,6 +10,7 @@ echo
 
 # ask the user for the table name
 read -p "Enter the name of the table: " table_name
+table_name="${table_name//[[:space:]]/}"
 
 
 # check if the table already exists

@@ -15,6 +15,7 @@ shopt -s extglob
 
 # ask the user for the table name
 read -p "Enter the name of the table: " table_name
+table_name="${table_name//[[:space:]]/}"
 
 # check if the table already exists
 if [ -f "${current_db}/tables/${table_name}" ]
@@ -31,13 +32,16 @@ then
 
 
     # which column to update
+    echo "Columns ${column_names[@]}"
     read -p "Enter the name of the column to update: " col_name
+    col_name="${col_name//[[:space:]]/}"
+
 
     # check if the column exists
     update_column_index=-1
     for (( i=0; i<column_num; i++ ))
     do
-        if [[ "${column_names[$i]}" == "$col_name" ]]; then
+        if [[ "${column_names[$i]^^}" == "${col_name^^}" ]]; then
             update_column_index=$i
             break
         fi
@@ -48,7 +52,7 @@ then
     if [[ $update_column_index -eq -1 ]]; then
         echo "Column '$col_name' does not exist in table '$table_name'."
     else
-        echo "Updating column '$col_name' in table '$table_name'."
+        echo "Updating column '${column_names[update_column_index]}' in table '$table_name'."
 
         col_dtype=${column_dtypes[$update_column_index]^^} # convert to uppercase
         col_constraint=${column_constraints[$update_column_index]^^} # convert to uppercase
@@ -59,7 +63,6 @@ then
 
         echo "Enter new value for column ${col_name} Type: ${col_dtype}, Constraint: ${col_constraint}"
         read -p "> " input_value
-
         input_value="${input_value//[[:space:]]/}"
         
         # validate constraints
@@ -147,19 +150,24 @@ then
 
             # user enter a condition to identify which rows to update
             # ex: update where id=5 or name='Ahmed'or age>30
-
-            read -p "Enter the condition to identify rows to update (e.g., id=5): " condition
+            echo "available conditions: [=, >, <], use any col"
+            read -p "Enter the condition to identify rows to update (e.g., col>5): " condition
 
             # parse the condition
             condition_column=$(echo $condition | awk -F'[=<>]' '{print $1}')
             condition_operator=$(echo $condition | grep -o '[=<>]' )
             condition_value=$(echo $condition | awk -F'[=<>]' '{print $2}')
+            # handle spaces
+            condition_column="${condition_column//[[:space:]]/}"
+            condition_operator="${condition_operator//[[:space:]]/}"
+            condition_value="${condition_value//[[:space:]]/}"
+            
 
             # find the index of the condition column
             condition_column_index=-1
             for (( i=0; i<column_num; i++ ))
             do
-                if [[ "${column_names[$i]}" == "$condition_column" ]]; then
+                if [[ "${column_names[$i]^^}" == "${condition_column^^}" ]]; then
                     condition_column_index=$i
                     break
                 fi
