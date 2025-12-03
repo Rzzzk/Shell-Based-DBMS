@@ -226,9 +226,7 @@ conditioned_table(){
 			   # is string 
 			   option=$(zenity --list --title="Select Operator for the condition " \
 				    --column="Operator" \
-				    "==" \
-				    ">" \
-				    "<")
+				    "==" )
 			   #select option in "==" ; do
 				    case $option in
 					"==")
