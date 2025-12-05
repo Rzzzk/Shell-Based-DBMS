@@ -29,53 +29,55 @@ select_display_menu(){
 		    #echo "*****************************"
 		    return
 		    ;;
-		"specific_columns")
-		    # get the columns 
-		    columns=$(cut -d ":" -f 1 "$3")
-		    #echo "$columns" | nl -s " - " -w 1
-		    enumerated_col=$(echo "$columns" | nl -s " - " -w 1)
-		    num_of_columns=$(wc -l < "$3")
-		    echo $enumerated_col
-		    
-		    declare -a column_to_display
-		    while true
-		    do  
-		    	column_num=$(zenity --entry --title="Columns to Print" --text=" $enumerated_col 
-		    	enter the column number u want to display or type (n) to finish :")   
-		        #read -p "enter the column number u want to display or type (n) to finish : " column_num
-		        
-		        if [ "$column_num" = "n" ]; then
-		            break 
-		        fi
-		        
-		        # check the validity of the column number entered
-		        if [[ ! $column_num =~ ^[1-9]+$ ||  $column_num -gt $num_of_columns ]]; then
-		            
-			    zenity --info --text="Invalid column number" --title="Error"
-		            continue 
-		        fi
+		 "specific_columns")
 
-		        # save them in a visited array 
-		        column_to_display[$column_num]=1
-		    done
-		    
-		    # no columns entered return 
-		    if [ ${#column_to_display[@]} -eq 0 ]; then
-		        return 
-		    fi
+			columns=$(cut -d ":" -f 1 "$3")
 
-		    # now display the selected column needed 
-		    fields=$(IFS=,; echo "${!column_to_display[*]}")
-		    #echo "*****************************"  
-		    #echo "*****************************"
-		    output=$(cut -d: -f"$fields" "$2")
-		    zenity --text-info \
-                --title="Display All" \
-                --width=600 --height=400 \
-                --ok-label="Close" \
-                --filename=<(echo "$output")
-		    
-		    return 
+			# build zenity checklist data
+			checklist_data=()
+			while IFS= read -r col; do
+			    checklist_data+=(FALSE "$col")
+			done <<< "$columns"
+
+			# show checklist menu
+			selected_columns=$(zenity --list \
+			    --checklist \
+			    --title="Select Columns to Display" \
+			    --text="Choose the columns you want to display:" \
+			    --column="Select" --column="Column Name" \
+			    "${checklist_data[@]}" \
+			    --width=400 --height=300 \
+			    --separator=":")
+
+			# if user closed or selected nothing
+			if [ -z "$selected_columns" ]; then
+			    zenity --info --text="No columns selected"
+			    return
+			fi
+
+			# convert selected column NAMES 
+			fields=""
+			while IFS=":" read -ra selected; do
+			    for col in "${selected[@]}"; do
+				num=$(grep -n -w "$col" <<< "$columns" | cut -d: -f1)  # 3:column3
+				fields+="$num,"
+			    done
+			done <<< "$selected_columns"
+
+			# remove trailing comma
+			fields=${fields%,}
+
+			# extract selected columns from data file ($2)
+			output=$(cut -d: -f"$fields" "$2")
+
+			# display result
+			zenity --text-info \
+			    --title="Selected Columns" \
+			    --width=600 --height=400 \
+			    --ok-label="Close" \
+			    --filename=<(echo "$output")
+
+		    return
 		    ;;
 		"Exit")
 		    return
