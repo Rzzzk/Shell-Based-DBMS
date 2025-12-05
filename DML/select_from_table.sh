@@ -17,18 +17,22 @@ select_display_menu(){
 		--height=250 --width=300)
 
 	    case $option in
+	    
 		"diplay_all")
-		output=$(cat "$2")
-            zenity --text-info \
-                --title="Display All" \
-                --width=600 --height=400 \
-                --ok-label="Close" \
-                --filename=<(echo "$output")
-		    #echo "*****************************"
-		    #cat "$2"
-		    #echo "*****************************"
+		
+			output=$(cat "$2")
+		    zenity --text-info \
+		        --title="Display All" \
+		        --width=600 --height=400 \
+		        --ok-label="Close" \
+		        --filename=<(echo "$output")
+		        
+		        
 		    return
 		    ;;
+		    
+		    
+		    
 		 "specific_columns")
 
 			columns=$(cut -d ":" -f 1 "$3")
@@ -91,7 +95,7 @@ select_display_menu(){
 
 conditioned_table(){
 		#$1 = TableName
-		# touch /tmp/tableName copy the table into /tmp/tableName (copy)
+		# touch /tmp/tableName copy the table into /tmp/tableName (copy)   (older version select and )
 		# 1 - ask for column to condition on 
 		# 2 - show the availiable column number
 		# 3 - enter the column number
@@ -168,16 +172,7 @@ conditioned_table(){
 					    awk -F: -v value="$value" -v column="$conditioned_column" '{ if ($column == value) print }' /tmp/$1  >  /tmp/con_temp
 					    mv /tmp/con_temp /tmp/$1
 					    
-					    if zenity --question \
-						    --title="Add Another Condition?" \
-						    --text="Do you want to add another condition?" \
-						    --ok-label="Yes" \
-						    --cancel-label="No"
-						 then
-						 	continue
-					    else
-					   	   break 
-					    fi
+					    break
 										    
 					    
 					    ;;
@@ -190,16 +185,7 @@ conditioned_table(){
 					    
 					    #read -p "do u want to add another condition (y|n): "  conTinue
 					    
-					    if zenity --question \
-						    --title="Add Another Condition?" \
-						    --text="Do you want to add another condition?" \
-						    --ok-label="Yes" \
-						    --cancel-label="No"; then
-						    # User clicked Yes
-					           continue
-					    else
-					   	   break 
-					    fi
+					    break
 					    
 					
 					
@@ -211,20 +197,7 @@ conditioned_table(){
 					    awk -F: -v value="$value" -v column="$conditioned_column" '{ if ($column < value) print }' /tmp/$1  >  /tmp/con_temp
 					    mv /tmp/con_temp /tmp/$1
 					    
-					    #read -p "do u want to add another condition (y|n): "  conTinue
-					    
-							      
-					    if zenity --question \
-						    --title="Add Another Condition?" \
-						    --text="Do you want to add another condition?" \
-						    --ok-label="Yes" \
-						    --cancel-label="No"; then
-						    # User clicked Yes
-					          continue
-					    else
-					   	   break 
-					    fi
-
+					    break
 					    
 					    
 					    
@@ -253,19 +226,7 @@ conditioned_table(){
 					    
 					    #read -p "do u want to add another condition (y|n): "  conTinue
 					    
-					    if zenity --question \
-						    --title="Add Another Condition?" \
-						    --text="Do you want to add another condition?" \
-						    --ok-label="Yes" \
-						    --cancel-label="No"; then
-						    # User clicked Yes
-					           continue
-					    else
-					   	   break 
-					    fi
-					    
-					    
-					    
+					    break 
 					    ;;
 					"*")
 					     zenity --info --text="Invalid Option try again" --title="Error"
