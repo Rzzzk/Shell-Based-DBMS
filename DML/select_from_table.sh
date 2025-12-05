@@ -137,16 +137,8 @@ conditioned_table(){
 			
 			if [ $C_type = INT ]
 			then
-				option=$(zenity --list --title="Select Operator for the condition " \
-				    --column="Operator" \
-				    "==" \
-				    ">" \
-				    "<")
-				#select option in "==" ">" "<"; do
-				    case $option in
-					"==")
-					    # awk on /tmp/$1
-					    while true 
+				# get the INT value 
+				while true 
 					    do
 						    value=$(zenity --entry --title="Value" --text="enter value") 
 						    
@@ -159,6 +151,18 @@ conditioned_table(){
 						    		zenity --error  --text="invalid input"
 						    fi
 					    done
+					    
+					    
+				option=$(zenity --list --title="Select Operator for the condition " \
+				    --column="Operator" \
+				    "==" \
+				    ">" \
+				    "<")
+				#select option in "==" ">" "<"; do
+				    case $option in
+					"==")
+					    # awk on /tmp/$1
+					    
 					    #read -p "enter value : " value
 					    # awk comparsion
 					    awk -F: -v value="$value" -v column="$conditioned_column" '{ if ($column == value) print }' /tmp/$1  >  /tmp/con_temp
@@ -178,21 +182,7 @@ conditioned_table(){
 					    
 					    ;;
 					">")
-					    
-					    
-					    while true 
-					    do
-						    value=$(zenity --entry --title="Value" --text="enter value") 
-						    
-						    # if value is not number break 
-						    if [[ $value =~ ^-?[0-9]+$ ]]; then
-							echo "You entered a valid integer: $value"
-							break
-						    else	
-						    	
-						    		zenity --error  --text="invalid input"
-						    fi
-					    done
+					
 					    #read -p "enter value : " value
 					    # awk comparsion
 					    awk -F: -v value="$value" -v column="$conditioned_column" '{ if ($column > value) print }' /tmp/$1  >  /tmp/con_temp
@@ -216,21 +206,6 @@ conditioned_table(){
 					    break
 					    ;;
 					"<")
-					
-					    
-					    while true 
-					    do
-						    value=$(zenity --entry --title="Value" --text="enter value") 
-						    
-						    # if value is not number break 
-						    if [[ $value =~ ^-?[0-9]+$ ]]; then
-							echo "You entered a valid integer: $value"
-							break
-						    else	
-						    	
-						    		zenity --error  --text="invalid input"
-						    fi
-					    done
 					    #read -p "enter value : " value
 					    # awk comparsion
 					    awk -F: -v value="$value" -v column="$conditioned_column" '{ if ($column < value) print }' /tmp/$1  >  /tmp/con_temp
