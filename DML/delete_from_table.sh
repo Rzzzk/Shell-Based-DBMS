@@ -53,6 +53,19 @@ delete_table(){
 			
 			if [ $C_type = INT ]
 			then
+				while true 
+				    do
+					    value=$(zenity --entry --title="Value" --text="enter value") 
+					    
+					    # if value is not number break 
+					    if [[ $value =~ ^-?[0-9]+$ ]]; then
+						echo "You entered a valid integer: $value"
+						break
+					    else	
+					    	
+					    		zenity --error  --text="invalid input"
+					    fi
+				    done
 				#select option in "==" ">" "<"; do
 				option=$(zenity --list --title="Select Operator for the condition " \
 				    --column="Operator" \
@@ -62,103 +75,31 @@ delete_table(){
 				    
 				    case $option in
 					"==")
-					    while true 
-					    do
-						    value=$(zenity --entry --title="Value" --text="enter value") 
-						    
-						    # if value is not number break 
-						    if [[ $value =~ ^-?[0-9]+$ ]]; then
-							echo "You entered a valid integer: $value"
-							break
-						    else	
-						    	
-						    		zenity --error  --text="invalid input"
-						    fi
-					    done
+					    
 					    # awk comparsion
 					    awk -F: -v value="$value" -v column="$conditioned_column" '{ if ($column != value) print }' /tmp/$TableName  >  /tmp/con_temp
 					    mv /tmp/con_temp /tmp/$TableName
 					    
 					    
-						
-					    if zenity --question \
-						    --title="Add Another Condition?" \
-						    --text="Do you want to add another condition?" \
-						    --ok-label="Yes" \
-						    --cancel-label="No"
-						 then
-						 	continue
-					    else
-					   	   break 
-					    fi
-						
+				 
+					    break
 					    
 					    ;;
 					">")
 					    
-					    while true 
-					    do
-						    value=$(zenity --entry --title="Value" --text="enter value") 
-						    
-						    # if value is not number break 
-						    if [[ $value =~ ^-?[0-9]+$ ]]; then
-							echo "You entered a valid integer: $value"
-							break
-						    else	
-						    	
-						    		zenity --error  --text="invalid input"
-						    fi
-					    done   # awk comparsion
 					    awk -F: -v value="$value" -v column="$conditioned_column" '{ if ($column <= value) print }' /tmp/$TableName  >  /tmp/con_temp
 					    mv /tmp/con_temp /tmp/$TableName
-					    
-					    if zenity --question \
-						    --title="Add Another Condition?" \
-						    --text="Do you want to add another condition?" \
-						    --ok-label="Yes" \
-						    --cancel-label="No"
-						 then
-						 	continue
-					    else
-					   	   break 
-					    fi
-						
-					    
 					
 					
 					    break
 					    ;;
 					"<")
-					    
-					    while true 
-					    do
-						    value=$(zenity --entry --title="Value" --text="enter value")
-						    
-						    # if value is not number break 
-						    if [[ $value =~ ^-?[0-9]+$ ]]; then
-							echo "You entered a valid integer: $value"
-							break
-						    else	
-						    	
-						    		zenity --error  --text="invalid input"
-						    fi
-					    done
+					   
 					    # awk comparsion
 					    awk -F: -v value="$value" -v column="$conditioned_column" '{ if ($column >= value) print }' /tmp/$TableName  >  /tmp/con_temp
 					    mv /tmp/con_temp /tmp/$TableName
 					    
-					    
-					    if zenity --question \
-						    --title="Add Another Condition?" \
-						    --text="Do you want to add another condition?" \
-						    --ok-label="Yes" \
-						    --cancel-label="No"
-						 then
-						 	continue
-					    else
-					   	   break 
-					    fi
-						
+					   
 					    
 					    
 					    
@@ -184,19 +125,10 @@ delete_table(){
 					    mv /tmp/con_temp /tmp/$TableName
 					    
 					    
-					    if zenity --question \
-						    --title="Add Another Condition?" \
-						    --text="Do you want to add another condition?" \
-						    --ok-label="Yes" \
-						    --cancel-label="No"
-						 then
-						 	continue
-					    else
-					   	   break 
-					    fi
 						
 					    
-					    
+					     
+					    break
 					    
 					    ;;
 					"*")

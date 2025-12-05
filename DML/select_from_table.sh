@@ -185,8 +185,7 @@ conditioned_table(){
 					    mv /tmp/con_temp /tmp/$1
 					    
 					    #read -p "do u want to add another condition (y|n): "  conTinue
-					    
-					    break
+					   
 					    
 					
 					
@@ -198,9 +197,7 @@ conditioned_table(){
 					    awk -F: -v value="$value" -v column="$conditioned_column" '{ if ($column < value) print }' /tmp/$1  >  /tmp/con_temp
 					    mv /tmp/con_temp /tmp/$1
 					    
-					    break
-					    
-					    
+					  
 					    
 					    break
 					    ;;
