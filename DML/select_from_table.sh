@@ -102,6 +102,7 @@ conditioned_table(){
 		# 4 - filter the /tmp/tableName
 		# go-to 1 again  done unitl user type n  
 		
+		# TODO : Radio button will work better here in selecting the conditioned columns
 		cp $default_path/$connectedDB/tables/$1  /tmp/$1
 		
 		echo "*******************"
